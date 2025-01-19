@@ -1,34 +1,49 @@
-def bisection_method(f_derivative, start_point, end_point, epsilon=1e-5):
+import sympy
+import math
+
+def max_steps(start_point, end_point, epsilon):
+    """Calculate the maximum number of steps for the bisection method."""
+    return math.ceil(math.log2((end_point - start_point) / epsilon))
+
+def bisection_method(f, start_point, end_point, epsilon=1e-6):
     """
-    Find the root of a function using the bisection method.
-    :param f_derivative: The derivative of the function
-    :param start_point: The start of the interval
-    :param end_point: The end of the interval
-    :param epsilon: Epsilon value for convergence
+    Find the root of a  function using the bisection method.
+
+    :param f:The function
+    :param start_point: Start of the interval
+    :param end_point: End of the interval
+    :param epsilon: Convergence tolerance
     :return: root, iterations - The root of the function and the number of iterations
     """
-    a, b ,f= start_point, end_point, f_derivative
+    a, b = start_point, end_point
     iterations = 0
 
+    if sympy.sign(f(a)) == sympy.sign(f(b)):
+        raise Exception("The scalars start_point and end_point do not bound a root")
 
-    if f(a) * f(b) >= 0:
-        print("---no root found in---")
-        print(f" [{a:.2f}, {b:.2f}]")
+    steps = max_steps(a, b, epsilon)
 
-        return None, iterations
+    # Print header for the iteration table
+    print("{:<10} {:<15} {:<15} {:<15} {:<15} {:<15} {:<15}".format(
+        "Iteration", "a", "b", "f(a)", "f(b)", "c", "f(c)"))
 
-    while (b - a) / 2 > epsilon:
-        iterations += 1
+    while abs(b - a) > epsilon and iterations < steps:
         c = (a + b) / 2
         fc = f(c)
 
-        if abs(fc) < epsilon:
-            break
+        print("{:<10} {:<15.6f} {:<15.6f} {:<15.6f} {:<15.6f} {:<15.6f} {:<15.6f}".format(
+            iterations, a, b, f(a), f(b), c, fc))
 
-        if f(a) * fc < 0:
+        if abs(fc) < epsilon:
+            return c, iterations
+
+        if sympy.sign(f(a)) != sympy.sign(fc):
             b = c
         else:
             a = c
+
+        iterations += 1
+
 
     root = (a + b) / 2
     return root, iterations
